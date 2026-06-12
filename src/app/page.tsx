@@ -1,6 +1,49 @@
+"use client";
+
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+
+type LoginErrors = {
+  email?: string;
+  password?: string;
+};
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<LoginErrors>({});
+
+  const validateLogin = () => {
+    const nextErrors: LoginErrors = {};
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      nextErrors.email = "Email address is required.";
+    } else if (!emailPattern.test(trimmedEmail)) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+
+    if (!password) {
+      nextErrors.password = "Password is required.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (validateLogin()) {
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#eef3f8] px-4 py-8 text-slate-950 sm:px-6">
       <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-md flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -16,7 +59,7 @@ export default function Home() {
         </header>
 
         <div className="flex flex-1 items-center px-7 py-9">
-          <form className="w-full" action="/dashboard">
+          <form className="w-full" noValidate onSubmit={handleSubmit}>
             <h1 className="text-center text-3xl font-semibold tracking-normal">
               Welcome Back
             </h1>
@@ -27,12 +70,31 @@ export default function Home() {
                   Email Address
                 </span>
                 <input
-                  className="h-12 rounded-md border border-slate-300 bg-white px-4 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  aria-invalid={Boolean(errors.email)}
+                  className={`h-12 rounded-md border bg-white px-4 text-base outline-none transition focus:ring-2 ${
+                    errors.email
+                      ? "border-red-500 focus:border-red-600 focus:ring-red-600/10"
+                      : "border-slate-300 focus:border-slate-950 focus:ring-slate-950/10"
+                  }`}
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    setErrors((current) => ({ ...current, email: undefined }));
+                  }}
                 />
+                {errors.email ? (
+                  <span
+                    className="text-sm font-medium text-red-600"
+                    id="email-error"
+                    role="alert"
+                  >
+                    {errors.email}
+                  </span>
+                ) : null}
               </label>
 
               <label className="grid gap-2">
@@ -40,12 +102,36 @@ export default function Home() {
                   Password
                 </span>
                 <input
-                  className="h-12 rounded-md border border-slate-300 bg-white px-4 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  aria-describedby={
+                    errors.password ? "password-error" : undefined
+                  }
+                  aria-invalid={Boolean(errors.password)}
+                  className={`h-12 rounded-md border bg-white px-4 text-base outline-none transition focus:ring-2 ${
+                    errors.password
+                      ? "border-red-500 focus:border-red-600 focus:ring-red-600/10"
+                      : "border-slate-300 focus:border-slate-950 focus:ring-slate-950/10"
+                  }`}
                   name="password"
                   type="password"
                   autoComplete="current-password"
-                  required
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value);
+                    setErrors((current) => ({
+                      ...current,
+                      password: undefined,
+                    }));
+                  }}
                 />
+                {errors.password ? (
+                  <span
+                    className="text-sm font-medium text-red-600"
+                    id="password-error"
+                    role="alert"
+                  >
+                    {errors.password}
+                  </span>
+                ) : null}
               </label>
             </div>
 
@@ -66,12 +152,12 @@ export default function Home() {
             </button>
 
             <div className="mt-7 text-center">
-              <a
+              <Link
                 className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
-                href="#"
+                href="/forgot-password"
               >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
           </form>
         </div>
