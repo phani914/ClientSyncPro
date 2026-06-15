@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AuthNavigation } from "@/components/navigation/auth-navigation";
 
 export default function ForgotPassword() {
   return (
@@ -15,6 +16,7 @@ export default function ForgotPassword() {
             priority
           />
         </header>
+        <AuthNavigation active="forgot-password" />
 
         <div className="flex flex-1 items-center px-7 py-9">
           <form className="w-full" action="/">

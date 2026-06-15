@@ -1,14 +1,4 @@
-import Image from "next/image";
-
-const navItems = [
-  "Dashboard",
-  "Clients",
-  "Projects",
-  "Users",
-  "Reports",
-  "Settings",
-  "Logout",
-];
+import { DashboardNavigation } from "@/components/navigation/dashboard-navigation";
 
 const stats = [
   { label: "Total Clients", value: "125" },
@@ -49,34 +39,7 @@ const activities = [
 export default function Dashboard() {
   return (
     <main className="min-h-screen bg-[#eef3f8] text-slate-950">
-      <header className="border-b border-slate-200 bg-[#111820] px-4 py-3 shadow-sm sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4">
-          <Image
-            className="h-16 w-48 object-cover sm:w-56"
-            src="/client-pro-logo.png"
-            alt="ClientSync Pro"
-            width={1536}
-            height={1024}
-            priority
-          />
-
-          <nav className="flex w-full justify-center gap-2 overflow-x-auto pb-1 text-sm font-semibold text-slate-100 lg:pb-0">
-            {navItems.map((item) => (
-              <a
-                className={`shrink-0 rounded-md px-3 py-2 transition ${
-                  item === "Dashboard"
-                    ? "bg-white text-slate-950"
-                    : "hover:bg-white/10"
-                }`}
-                href={item === "Logout" ? "/" : "#"}
-                key={item}
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <DashboardNavigation active="dashboard" />
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

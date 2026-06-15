@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { AuthNavigation } from "@/components/navigation/auth-navigation";
 
 type LoginErrors = {
   email?: string;
@@ -57,6 +58,7 @@ export default function Home() {
             priority
           />
         </header>
+        <AuthNavigation active="login" />
 
         <div className="flex flex-1 items-center px-7 py-9">
           <form className="w-full" noValidate onSubmit={handleSubmit}>
