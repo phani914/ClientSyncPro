@@ -51,7 +51,12 @@ export default function NewReportPage() {
                 </span>
                 <input
                   className="h-12 rounded-md border border-slate-300 bg-white px-4 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  maxLength={80}
+                  minLength={3}
                   name="name"
+                  pattern="[A-Za-z0-9][A-Za-z0-9 .,&()/-]*"
+                  required
+                  title="Use at least 3 letters or numbers for the report name."
                   type="text"
                 />
               </label>
@@ -92,7 +97,10 @@ export default function NewReportPage() {
                 </span>
                 <textarea
                   className="min-h-32 rounded-md border border-slate-300 bg-white px-4 py-3 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  maxLength={500}
+                  minLength={20}
                   name="description"
+                  required
                 />
               </label>
             </div>
@@ -155,7 +163,7 @@ export default function NewReportPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 className="h-12 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-                type="button"
+                type="submit"
               >
                 Create Report
               </button>

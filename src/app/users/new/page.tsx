@@ -50,7 +50,13 @@ export default function NewUserPage() {
                 </span>
                 <input
                   className="h-12 rounded-md border border-slate-300 bg-white px-4 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  autoComplete="name"
+                  maxLength={60}
+                  minLength={2}
                   name="name"
+                  pattern="[A-Za-z][A-Za-z .'-]*"
+                  required
+                  title="Enter a valid full name using letters, spaces, apostrophes, periods, or hyphens."
                   type="text"
                 />
               </label>
@@ -61,7 +67,10 @@ export default function NewUserPage() {
                 </span>
                 <input
                   className="h-12 rounded-md border border-slate-300 bg-white px-4 text-base outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                  autoComplete="email"
+                  maxLength={120}
                   name="email"
+                  required
                   type="email"
                 />
               </label>
@@ -131,7 +140,7 @@ export default function NewUserPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 className="h-12 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-                type="button"
+                type="submit"
               >
                 Create User
               </button>

@@ -101,8 +101,14 @@ export default function UsersPage() {
                 User Directory
               </h2>
               <input
+                aria-label="Search users"
                 className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 sm:max-w-xs"
+                maxLength={80}
+                minLength={2}
+                name="userSearch"
+                pattern="[A-Za-z0-9 .@'-]*"
                 placeholder="Search users"
+                title="Enter at least 2 letters or numbers to search users."
                 type="search"
               />
             </div>

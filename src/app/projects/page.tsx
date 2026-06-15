@@ -103,6 +103,8 @@ export default function ProjectsPage() {
               <select
                 className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 sm:max-w-48"
                 defaultValue="all"
+                name="status"
+                required
               >
                 <option value="all">All Statuses</option>
                 <option value="on-track">On Track</option>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DashboardNavigation } from "@/components/navigation/dashboard-navigation";
 
 const clients = [
@@ -62,12 +63,12 @@ export default function ClientsPage() {
             </p>
           </div>
 
-          <button
-            className="h-11 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-            type="button"
+          <Link
+            className="grid h-11 place-items-center rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+            href="/clients/new"
           >
             Add Client
-          </button>
+          </Link>
         </section>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -92,8 +93,14 @@ export default function ClientsPage() {
               Client Directory
             </h2>
             <input
+              aria-label="Search clients"
               className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 sm:max-w-xs"
+              maxLength={80}
+              minLength={2}
+              name="clientSearch"
+              pattern="[A-Za-z0-9 .,&'-]*"
               placeholder="Search clients"
+              title="Enter at least 2 letters or numbers to search clients."
               type="search"
             />
           </div>
