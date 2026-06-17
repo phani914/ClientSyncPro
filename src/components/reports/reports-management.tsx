@@ -1,0 +1,396 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import {
+  initialReports,
+  readExportCount,
+  readStoredReports,
+  reportCadences,
+  ReportCadence,
+  ReportCategory,
+  reportCategories,
+  ReportRecord,
+  reportExportsStorageKey,
+  reportsStorageKey,
+  reportStatuses,
+  ReportStatus,
+} from "./report-data";
+
+function getDeliveryText(report: ReportRecord) {
+  if (report.cadence === "Daily") {
+    return "Daily, 06:00 PM";
+  }
+
+  if (report.cadence === "Weekly") {
+    return "Monday, 08:00 AM";
+  }
+
+  if (report.cadence === "Monthly") {
+    return "First day monthly";
+  }
+
+  return "Manual export";
+}
+
+export function ReportsManagement() {
+  const [reports, setReports] = useState<ReportRecord[]>(initialReports);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | ReportStatus>("all");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | ReportCategory>(
+    "all",
+  );
+  const [exportCount, setExportCount] = useState(132);
+  const [message, setMessage] = useState("Report library ready.");
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setReports(readStoredReports());
+      setExportCount(readExportCount());
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
+
+  function persistReports(nextReports: ReportRecord[]) {
+    setReports(nextReports);
+    window.localStorage.setItem(reportsStorageKey, JSON.stringify(nextReports));
+  }
+
+  function updateStatus(reportName: string, status: ReportStatus) {
+    const nextReports = reports.map((report) =>
+      report.name === reportName
+        ? { ...report, status, updated: "Today" }
+        : report,
+    );
+
+    persistReports(nextReports);
+    setMessage(`${reportName} moved to ${status}.`);
+  }
+
+  function updateCadence(reportName: string, cadence: ReportCadence) {
+    const nextReports = reports.map((report) =>
+      report.name === reportName
+        ? { ...report, cadence, updated: "Today" }
+        : report,
+    );
+
+    persistReports(nextReports);
+    setMessage(`${reportName} cadence updated to ${cadence}.`);
+  }
+
+  function exportReport(reportName: string) {
+    const nextCount = exportCount + 1;
+
+    setExportCount(nextCount);
+    window.localStorage.setItem(reportExportsStorageKey, String(nextCount));
+    setMessage(`${reportName} exported.`);
+  }
+
+  function deleteReport(reportName: string) {
+    const confirmed = window.confirm(`Remove ${reportName} from reports?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    persistReports(reports.filter((report) => report.name !== reportName));
+    setMessage(`${reportName} removed from the library.`);
+  }
+
+  const filteredReports = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return reports.filter((report) => {
+      const matchesStatus =
+        statusFilter === "all" || report.status === statusFilter;
+      const matchesCategory =
+        categoryFilter === "all" || report.category === categoryFilter;
+      const matchesQuery =
+        !normalizedQuery ||
+        [
+          report.name,
+          report.category,
+          report.owner,
+          report.cadence,
+          report.status,
+          report.format,
+          report.description,
+          report.dataSources.join(" "),
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedQuery);
+
+      return matchesStatus && matchesCategory && matchesQuery;
+    });
+  }, [categoryFilter, query, reports, statusFilter]);
+
+  const reportSummary = useMemo(
+    () => [
+      {
+        label: "Published Reports",
+        value: String(
+          reports.filter((report) => report.status === "Published").length,
+        ),
+      },
+      {
+        label: "Scheduled",
+        value: String(
+          reports.filter((report) => report.status === "Scheduled").length,
+        ),
+      },
+      {
+        label: "Drafts",
+        value: String(
+          reports.filter((report) => report.status === "Draft").length,
+        ),
+      },
+      { label: "Exports This Month", value: String(exportCount) },
+    ],
+    [exportCount, reports],
+  );
+
+  const scheduledReports = useMemo(
+    () =>
+      reports.filter(
+        (report) =>
+          report.status === "Scheduled" || report.status === "Published",
+      ),
+    [reports],
+  );
+
+  return (
+    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
+      <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
+            Report Management
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+            Reports
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
+            Manage operational reports, export schedules, ownership, and
+            delivery cadence across client and project workflows.
+          </p>
+        </div>
+
+        <Link
+          className="grid h-11 place-items-center rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+          href="/reports/new"
+        >
+          New Report
+        </Link>
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {reportSummary.map((item) => (
+          <article
+            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+            key={item.label}
+          >
+            <p className="text-sm font-semibold text-slate-500">{item.label}</p>
+            <p className="mt-4 text-4xl font-semibold tracking-normal">
+              {item.value}
+            </p>
+          </article>
+        ))}
+      </section>
+
+      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+        <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-4 xl:flex-row xl:items-center">
+            <div>
+              <h2 className="text-lg font-semibold tracking-normal">
+                Report Library
+              </h2>
+              <p className="mt-1 text-sm font-medium text-slate-600">
+                {message}
+              </p>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <input
+                aria-label="Search reports"
+                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 md:w-52"
+                maxLength={80}
+                minLength={2}
+                name="reportSearch"
+                onChange={(event) => setQuery(event.target.value)}
+                pattern="[A-Za-z0-9 .,&()/-]*"
+                placeholder="Search reports"
+                title="Enter at least 2 letters or numbers to search reports."
+                type="search"
+                value={query}
+              />
+              <select
+                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 md:w-44"
+                name="status"
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as "all" | ReportStatus)
+                }
+                value={statusFilter}
+              >
+                <option value="all">All Statuses</option>
+                {reportStatuses.map((status) => (
+                  <option key={status}>{status}</option>
+                ))}
+              </select>
+              <select
+                className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10 md:w-48"
+                name="category"
+                onChange={(event) =>
+                  setCategoryFilter(
+                    event.target.value as "all" | ReportCategory,
+                  )
+                }
+                value={categoryFilter}
+              >
+                <option value="all">All Categories</option>
+                {reportCategories.map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1180px] text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                <tr>
+                  <th className="px-5 py-3 font-semibold">Report</th>
+                  <th className="px-5 py-3 font-semibold">Category</th>
+                  <th className="px-5 py-3 font-semibold">Owner</th>
+                  <th className="px-5 py-3 font-semibold">Cadence</th>
+                  <th className="px-5 py-3 font-semibold">Status</th>
+                  <th className="px-5 py-3 font-semibold">Format</th>
+                  <th className="px-5 py-3 font-semibold">Updated</th>
+                  <th className="px-5 py-3 font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredReports.map((report) => (
+                  <tr className="transition hover:bg-slate-50" key={report.name}>
+                    <td className="px-5 py-4 align-top">
+                      <p className="font-semibold text-slate-900">
+                        {report.name}
+                      </p>
+                      <p className="mt-1 max-w-xs text-xs font-medium text-slate-500">
+                        {report.description}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 align-top text-slate-600">
+                      {report.category}
+                    </td>
+                    <td className="px-5 py-4 align-top text-slate-600">
+                      {report.owner}
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <select
+                        aria-label={`Update ${report.name} cadence`}
+                        className="h-9 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                        onChange={(event) =>
+                          updateCadence(
+                            report.name,
+                            event.target.value as ReportCadence,
+                          )
+                        }
+                        value={report.cadence}
+                      >
+                        {reportCadences.map((cadence) => (
+                          <option key={cadence}>{cadence}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <select
+                        aria-label={`Update ${report.name} status`}
+                        className="h-9 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                        onChange={(event) =>
+                          updateStatus(
+                            report.name,
+                            event.target.value as ReportStatus,
+                          )
+                        }
+                        value={report.status}
+                      >
+                        {reportStatuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-5 py-4 align-top font-semibold">
+                      {report.format}
+                    </td>
+                    <td className="px-5 py-4 align-top text-slate-600">
+                      {report.updated}
+                    </td>
+                    <td className="px-5 py-4 align-top">
+                      <div className="flex gap-2">
+                        <button
+                          className="rounded-md border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                          onClick={() => exportReport(report.name)}
+                          type="button"
+                        >
+                          Export
+                        </button>
+                        <button
+                          className="rounded-md border border-red-200 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+                          onClick={() => deleteReport(report.name)}
+                          type="button"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {filteredReports.length === 0 ? (
+            <p className="border-t border-slate-100 px-5 py-4 text-sm font-medium text-slate-600">
+              No reports match your filters.
+            </p>
+          ) : null}
+        </article>
+
+        <article className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold tracking-normal">
+            Scheduled Delivery
+          </h2>
+
+          <div className="mt-5 grid gap-3">
+            {scheduledReports.map((report) => (
+              <div
+                className="rounded-md border border-slate-200 p-4"
+                key={report.name}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-semibold text-slate-900">{report.name}</p>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {report.recipients}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm font-medium text-slate-600">
+                  {getDeliveryText(report)}
+                </p>
+                <p className="mt-2 text-xs font-semibold text-slate-500">
+                  {report.format} export
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {scheduledReports.length === 0 ? (
+            <p className="mt-5 text-sm font-medium text-slate-600">
+              No scheduled reports yet.
+            </p>
+          ) : null}
+        </article>
+      </section>
+    </div>
+  );
+}

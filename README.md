@@ -2,6 +2,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Authentication is handled with a server-side credentials flow and an
+httpOnly session cookie. For local development, the default sign-in is:
+
+```bash
+AUTH_EMAIL=admin@clientsync.pro
+AUTH_PASSWORD=ClientSync@123
+AUTH_SECRET=replace-with-a-long-random-secret
+```
+
+Set these values in your deployment environment. In production,
+`AUTH_PASSWORD` is required for sign-in.
+
 First, run the development server:
 
 ```bash

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { logoutAction } from "@/app/auth/actions";
 
 type DashboardNavigationProps = {
   active?:
@@ -20,7 +21,6 @@ const navItems = [
   { href: "/roles", label: "Roles", key: "roles" },
   { href: "/reports", label: "Reports", key: "reports" },
   { href: "/settings", label: "Settings", key: "settings" },
-  { href: "/", label: "Logout", key: "logout" },
 ] as const;
 
 export function DashboardNavigation({
@@ -70,6 +70,15 @@ export function DashboardNavigation({
             );
           })}
         </nav>
+
+        <form action={logoutAction}>
+          <button
+            className="w-full shrink-0 rounded-md px-3 py-2 text-left text-sm font-semibold text-slate-100 transition hover:bg-white/10 focus:bg-white/10 lg:flex lg:h-11 lg:items-center"
+            type="submit"
+          >
+            Logout
+          </button>
+        </form>
       </div>
     </aside>
   );
