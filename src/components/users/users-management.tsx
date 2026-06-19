@@ -2,26 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   initialUsers,
   permissionGroups,
   UserRecord,
-  usersStorageKey,
 } from "./user-data";
-
-function readStoredUsers() {
-  try {
-    const storedUsers = window.localStorage.getItem(usersStorageKey);
-
-    if (!storedUsers) {
-      return initialUsers;
-    }
-
-    return JSON.parse(storedUsers) as UserRecord[];
-  } catch {
-    return initialUsers;
-  }
-}
 
 export function UsersManagement() {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
@@ -29,19 +15,30 @@ export function UsersManagement() {
   const [message, setMessage] = useState("User directory ready.");
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setUsers(readStoredUsers());
-    });
+    let isMounted = true;
 
-    return () => window.cancelAnimationFrame(frameId);
+    apiGet<UserRecord[]>("/api/users")
+      .then((nextUsers) => {
+        if (isMounted) {
+          setUsers(nextUsers);
+        }
+      })
+      .catch((error: Error) => {
+        if (isMounted) {
+          setMessage(error.message);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   function persistUsers(nextUsers: UserRecord[]) {
     setUsers(nextUsers);
-    window.localStorage.setItem(usersStorageKey, JSON.stringify(nextUsers));
   }
 
-  function updateStatus(email: string, status: UserRecord["status"]) {
+  async function updateStatus(email: string, status: UserRecord["status"]) {
     const nextUsers = users.map((user) =>
       user.email === email
         ? {
@@ -54,11 +51,23 @@ export function UsersManagement() {
     const changedUser = users.find((user) => user.email === email);
 
     persistUsers(nextUsers);
-    setMessage(
-      changedUser
-        ? `${changedUser.name} marked ${status.toLowerCase()}.`
-        : "User status updated.",
-    );
+    try {
+      await apiSend<UserRecord>("/api/users", "PATCH", {
+        email,
+        updates: {
+          status,
+          lastLogin: status === "Pending" ? "Invite sent" : changedUser?.lastLogin,
+        },
+      });
+      setMessage(
+        changedUser
+          ? `${changedUser.name} marked ${status.toLowerCase()}.`
+          : "User status updated.",
+      );
+    } catch (error) {
+      setUsers(users);
+      setMessage(error instanceof Error ? error.message : "User update failed.");
+    }
   }
 
   const filteredUsers = useMemo(() => {

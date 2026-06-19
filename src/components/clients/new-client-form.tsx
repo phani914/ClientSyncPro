@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   clientPlans,
   clientStatuses,
   ClientPlan,
   ClientRecord,
   ClientStatus,
-  clientsStorageKey,
   owners,
-  readStoredClients,
 } from "./client-data";
 
 type ClientForm = {
@@ -43,7 +42,7 @@ export function NewClientForm() {
     "Capture the client basics before creating the account.",
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -71,7 +70,9 @@ export function NewClientForm() {
       return;
     }
 
-    const currentClients = readStoredClients();
+    const currentClients = await apiGet<ClientRecord[]>("/api/clients").catch(
+      () => [],
+    );
     const duplicateClient = currentClients.find(
       (client) => client.name.toLowerCase() === name.toLowerCase(),
     );
@@ -93,13 +94,13 @@ export function NewClientForm() {
       notes,
     };
 
-    window.localStorage.setItem(
-      clientsStorageKey,
-      JSON.stringify([...currentClients, nextClient]),
-    );
-
-    setMessage(`${name} created. Returning to the client directory.`);
-    window.setTimeout(() => router.push("/clients"), 350);
+    try {
+      await apiSend<ClientRecord>("/api/clients", "POST", nextClient);
+      setMessage(`${name} created. Returning to the client directory.`);
+      window.setTimeout(() => router.push("/clients"), 350);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Client creation failed.");
+    }
   }
 
   return (

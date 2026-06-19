@@ -3,15 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   clients,
   formatProjectDate,
-  initialProjects,
   owners,
   ProjectRecord,
   ProjectStatus,
   projectStatuses,
-  projectsStorageKey,
 } from "./project-data";
 
 type ProjectForm = {
@@ -33,20 +32,6 @@ const initialForm: ProjectForm = {
   dueDate: "",
   status: "On Track",
 };
-
-function readStoredProjects() {
-  try {
-    const storedProjects = window.localStorage.getItem(projectsStorageKey);
-
-    if (!storedProjects) {
-      return initialProjects;
-    }
-
-    return JSON.parse(storedProjects) as ProjectRecord[];
-  } catch {
-    return initialProjects;
-  }
-}
 
 function getInitialProgress(status: ProjectStatus) {
   if (status === "Blocked") {
@@ -71,7 +56,7 @@ export function NewProjectForm() {
     "Capture the project basics before creating the record.",
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -97,7 +82,9 @@ export function NewProjectForm() {
       return;
     }
 
-    const currentProjects = readStoredProjects();
+    const currentProjects = await apiGet<ProjectRecord[]>("/api/projects").catch(
+      () => [],
+    );
     const duplicateProject = currentProjects.find(
       (project) => project.name.toLowerCase() === name.toLowerCase(),
     );
@@ -118,13 +105,13 @@ export function NewProjectForm() {
       scope,
     };
 
-    window.localStorage.setItem(
-      projectsStorageKey,
-      JSON.stringify([...currentProjects, nextProject]),
-    );
-
-    setMessage(`${name} created. Returning to the project portfolio.`);
-    window.setTimeout(() => router.push("/projects"), 350);
+    try {
+      await apiSend<ProjectRecord>("/api/projects", "POST", nextProject);
+      setMessage(`${name} created. Returning to the project portfolio.`);
+      window.setTimeout(() => router.push("/projects"), 350);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Project creation failed.");
+    }
   }
 
   return (

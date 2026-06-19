@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
-  initialUsers,
   permissions,
   roles,
   teams,
   UserRecord,
   UserRole,
-  usersStorageKey,
   UserTeam,
 } from "./user-data";
 
@@ -32,20 +31,6 @@ const initialForm: UserForm = {
   sendInvite: true,
 };
 
-function readStoredUsers() {
-  try {
-    const storedUsers = window.localStorage.getItem(usersStorageKey);
-
-    if (!storedUsers) {
-      return initialUsers;
-    }
-
-    return JSON.parse(storedUsers) as UserRecord[];
-  } catch {
-    return initialUsers;
-  }
-}
-
 export function NewUserForm() {
   const router = useRouter();
   const [form, setForm] = useState<UserForm>(initialForm);
@@ -65,7 +50,7 @@ export function NewUserForm() {
     });
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -81,7 +66,9 @@ export function NewUserForm() {
       return;
     }
 
-    const currentUsers = readStoredUsers();
+    const currentUsers = await apiGet<UserRecord[]>("/api/users").catch(
+      () => [],
+    );
     const duplicateUser = currentUsers.find(
       (user) => user.email.toLowerCase() === email,
     );
@@ -102,13 +89,13 @@ export function NewUserForm() {
       inviteSent: form.sendInvite,
     };
 
-    window.localStorage.setItem(
-      usersStorageKey,
-      JSON.stringify([...currentUsers, nextUser]),
-    );
-
-    setMessage(`${name} created. Returning to the user directory.`);
-    window.setTimeout(() => router.push("/users"), 350);
+    try {
+      await apiSend<UserRecord>("/api/users", "POST", nextUser);
+      setMessage(`${name} created. Returning to the user directory.`);
+      window.setTimeout(() => router.push("/users"), 350);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "User creation failed.");
+    }
   }
 
   return (

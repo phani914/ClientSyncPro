@@ -14,6 +14,22 @@ AUTH_SECRET=replace-with-a-long-random-secret
 Set these values in your deployment environment. In production,
 `AUTH_PASSWORD` is required for sign-in.
 
+## API Integration
+
+Client, project, report, and user screens now read and mutate data through
+Next.js Route Handlers under `/api`. The current implementation uses an
+in-memory store seeded from the demo records, so it is ready for UI integration
+and local testing without a database.
+
+- `GET|POST|PATCH|DELETE /api/clients`
+- `GET|POST|PATCH /api/projects`
+- `GET|POST|PATCH|DELETE /api/reports`
+- `POST /api/reports/export`
+- `GET|POST|PATCH /api/users`
+
+Replace `src/lib/api-store.ts` with database or upstream service calls when the
+production backend contract is available.
+
 First, run the development server:
 
 ```bash

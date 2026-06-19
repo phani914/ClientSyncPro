@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   clientPlans,
   ClientPlan,
   ClientRecord,
   clientStatuses,
   ClientStatus,
-  clientsStorageKey,
   initialClients,
-  readStoredClients,
 } from "./client-data";
 
 export function ClientsManagement() {
@@ -20,49 +19,85 @@ export function ClientsManagement() {
   const [message, setMessage] = useState("Client directory ready.");
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setClients(readStoredClients());
+    let isMounted = true;
+
+    apiGet<ClientRecord[]>("/api/clients")
+      .then((nextClients) => {
+        if (isMounted) {
+          setClients(nextClients);
+        }
+      })
+      .catch((error: Error) => {
+        if (isMounted) {
+          setMessage(error.message);
+        }
     });
 
-    return () => window.cancelAnimationFrame(frameId);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  function persistClients(nextClients: ClientRecord[]) {
+  async function persistClients(nextClients: ClientRecord[]) {
     setClients(nextClients);
-    window.localStorage.setItem(clientsStorageKey, JSON.stringify(nextClients));
   }
 
-  function updateStatus(clientName: string, status: ClientStatus) {
+  async function updateStatus(clientName: string, status: ClientStatus) {
     const nextClients = clients.map((client) =>
       client.name === clientName
         ? { ...client, status, lastContact: "Today" }
         : client,
     );
 
-    persistClients(nextClients);
-    setMessage(`${clientName} moved to ${status}.`);
+    await persistClients(nextClients);
+    try {
+      await apiSend<ClientRecord>("/api/clients", "PATCH", {
+        name: clientName,
+        updates: { status, lastContact: "Today" },
+      });
+      setMessage(`${clientName} moved to ${status}.`);
+    } catch (error) {
+      setClients(clients);
+      setMessage(error instanceof Error ? error.message : "Client update failed.");
+    }
   }
 
-  function updatePlan(clientName: string, plan: ClientPlan) {
+  async function updatePlan(clientName: string, plan: ClientPlan) {
     const nextClients = clients.map((client) =>
       client.name === clientName
         ? { ...client, plan, lastContact: "Today" }
         : client,
     );
 
-    persistClients(nextClients);
-    setMessage(`${clientName} plan updated to ${plan}.`);
+    await persistClients(nextClients);
+    try {
+      await apiSend<ClientRecord>("/api/clients", "PATCH", {
+        name: clientName,
+        updates: { plan, lastContact: "Today" },
+      });
+      setMessage(`${clientName} plan updated to ${plan}.`);
+    } catch (error) {
+      setClients(clients);
+      setMessage(error instanceof Error ? error.message : "Client update failed.");
+    }
   }
 
-  function deleteClient(clientName: string) {
+  async function deleteClient(clientName: string) {
     const confirmed = window.confirm(`Remove ${clientName} from clients?`);
 
     if (!confirmed) {
       return;
     }
 
-    persistClients(clients.filter((client) => client.name !== clientName));
-    setMessage(`${clientName} removed from the directory.`);
+    const nextClients = clients.filter((client) => client.name !== clientName);
+    await persistClients(nextClients);
+    try {
+      await apiSend<ClientRecord[]>("/api/clients", "DELETE", { name: clientName });
+      setMessage(`${clientName} removed from the directory.`);
+    } catch (error) {
+      setClients(clients);
+      setMessage(error instanceof Error ? error.message : "Client delete failed.");
+    }
   }
 
   const filteredClients = useMemo(() => {

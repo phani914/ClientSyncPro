@@ -2,20 +2,22 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   initialReports,
-  readExportCount,
-  readStoredReports,
   reportCadences,
   ReportCadence,
   ReportCategory,
   reportCategories,
   ReportRecord,
-  reportExportsStorageKey,
-  reportsStorageKey,
   reportStatuses,
   ReportStatus,
 } from "./report-data";
+
+type ReportsApiData = {
+  reports: ReportRecord[];
+  exportCount: number;
+};
 
 function getDeliveryText(report: ReportRecord) {
   if (report.cadence === "Daily") {
@@ -44,20 +46,31 @@ export function ReportsManagement() {
   const [message, setMessage] = useState("Report library ready.");
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setReports(readStoredReports());
-      setExportCount(readExportCount());
-    });
+    let isMounted = true;
 
-    return () => window.cancelAnimationFrame(frameId);
+    apiGet<ReportsApiData>("/api/reports")
+      .then((data) => {
+        if (isMounted) {
+          setReports(data.reports);
+          setExportCount(data.exportCount);
+        }
+      })
+      .catch((error: Error) => {
+        if (isMounted) {
+          setMessage(error.message);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   function persistReports(nextReports: ReportRecord[]) {
     setReports(nextReports);
-    window.localStorage.setItem(reportsStorageKey, JSON.stringify(nextReports));
   }
 
-  function updateStatus(reportName: string, status: ReportStatus) {
+  async function updateStatus(reportName: string, status: ReportStatus) {
     const nextReports = reports.map((report) =>
       report.name === reportName
         ? { ...report, status, updated: "Today" }
@@ -65,10 +78,19 @@ export function ReportsManagement() {
     );
 
     persistReports(nextReports);
-    setMessage(`${reportName} moved to ${status}.`);
+    try {
+      await apiSend<ReportRecord>("/api/reports", "PATCH", {
+        name: reportName,
+        updates: { status, updated: "Today" },
+      });
+      setMessage(`${reportName} moved to ${status}.`);
+    } catch (error) {
+      setReports(reports);
+      setMessage(error instanceof Error ? error.message : "Report update failed.");
+    }
   }
 
-  function updateCadence(reportName: string, cadence: ReportCadence) {
+  async function updateCadence(reportName: string, cadence: ReportCadence) {
     const nextReports = reports.map((report) =>
       report.name === reportName
         ? { ...report, cadence, updated: "Today" }
@@ -76,26 +98,51 @@ export function ReportsManagement() {
     );
 
     persistReports(nextReports);
-    setMessage(`${reportName} cadence updated to ${cadence}.`);
+    try {
+      await apiSend<ReportRecord>("/api/reports", "PATCH", {
+        name: reportName,
+        updates: { cadence, updated: "Today" },
+      });
+      setMessage(`${reportName} cadence updated to ${cadence}.`);
+    } catch (error) {
+      setReports(reports);
+      setMessage(error instanceof Error ? error.message : "Report update failed.");
+    }
   }
 
-  function exportReport(reportName: string) {
+  async function exportReport(reportName: string) {
     const nextCount = exportCount + 1;
 
     setExportCount(nextCount);
-    window.localStorage.setItem(reportExportsStorageKey, String(nextCount));
-    setMessage(`${reportName} exported.`);
+    try {
+      const data = await apiSend<{ exportCount: number }>(
+        "/api/reports/export",
+        "POST",
+      );
+      setExportCount(data.exportCount);
+      setMessage(`${reportName} exported.`);
+    } catch (error) {
+      setExportCount(exportCount);
+      setMessage(error instanceof Error ? error.message : "Report export failed.");
+    }
   }
 
-  function deleteReport(reportName: string) {
+  async function deleteReport(reportName: string) {
     const confirmed = window.confirm(`Remove ${reportName} from reports?`);
 
     if (!confirmed) {
       return;
     }
 
-    persistReports(reports.filter((report) => report.name !== reportName));
-    setMessage(`${reportName} removed from the library.`);
+    const nextReports = reports.filter((report) => report.name !== reportName);
+    persistReports(nextReports);
+    try {
+      await apiSend<ReportRecord[]>("/api/reports", "DELETE", { name: reportName });
+      setMessage(`${reportName} removed from the library.`);
+    } catch (error) {
+      setReports(reports);
+      setMessage(error instanceof Error ? error.message : "Report delete failed.");
+    }
   }
 
   const filteredReports = useMemo(() => {

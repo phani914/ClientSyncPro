@@ -2,27 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
   initialMilestones,
   initialProjects,
   ProjectRecord,
   ProjectStatus,
-  projectsStorageKey,
 } from "./project-data";
-
-function readStoredProjects() {
-  try {
-    const storedProjects = window.localStorage.getItem(projectsStorageKey);
-
-    if (!storedProjects) {
-      return initialProjects;
-    }
-
-    return JSON.parse(storedProjects) as ProjectRecord[];
-  } catch {
-    return initialProjects;
-  }
-}
 
 export function ProjectsManagement() {
   const [projects, setProjects] = useState<ProjectRecord[]>(initialProjects);
@@ -31,28 +17,52 @@ export function ProjectsManagement() {
   const [message, setMessage] = useState("Project portfolio ready.");
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setProjects(readStoredProjects());
-    });
+    let isMounted = true;
 
-    return () => window.cancelAnimationFrame(frameId);
+    apiGet<ProjectRecord[]>("/api/projects")
+      .then((nextProjects) => {
+        if (isMounted) {
+          setProjects(nextProjects);
+        }
+      })
+      .catch((error: Error) => {
+        if (isMounted) {
+          setMessage(error.message);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   function persistProjects(nextProjects: ProjectRecord[]) {
     setProjects(nextProjects);
-    window.localStorage.setItem(projectsStorageKey, JSON.stringify(nextProjects));
   }
 
-  function updateStatus(projectName: string, status: ProjectStatus) {
+  async function updateStatus(projectName: string, status: ProjectStatus) {
     const nextProjects = projects.map((project) =>
       project.name === projectName ? { ...project, status } : project,
     );
 
     persistProjects(nextProjects);
-    setMessage(`${projectName} moved to ${status}.`);
+    try {
+      await apiSend<ProjectRecord>("/api/projects", "PATCH", {
+        name: projectName,
+        updates: { status },
+      });
+      setMessage(`${projectName} moved to ${status}.`);
+    } catch (error) {
+      setProjects(projects);
+      setMessage(error instanceof Error ? error.message : "Project update failed.");
+    }
   }
 
-  function updateProgress(projectName: string, direction: "increase" | "decrease") {
+  async function updateProgress(
+    projectName: string,
+    direction: "increase" | "decrease",
+  ) {
+    let changedProject: ProjectRecord | undefined;
     const nextProjects = projects.map((project) => {
       if (project.name !== projectName) {
         return project;
@@ -63,7 +73,7 @@ export function ProjectsManagement() {
           ? Math.min(project.progress + 10, 100)
           : Math.max(project.progress - 10, 0);
 
-      return {
+      changedProject = {
         ...project,
         progress: nextProgress,
         status:
@@ -73,10 +83,23 @@ export function ProjectsManagement() {
               ? "On Track"
               : project.status,
       };
+
+      return changedProject;
     });
 
     persistProjects(nextProjects);
-    setMessage(`${projectName} progress updated.`);
+    try {
+      await apiSend<ProjectRecord>("/api/projects", "PATCH", {
+        name: projectName,
+        updates: changedProject
+          ? { progress: changedProject.progress, status: changedProject.status }
+          : {},
+      });
+      setMessage(`${projectName} progress updated.`);
+    } catch (error) {
+      setProjects(projects);
+      setMessage(error instanceof Error ? error.message : "Project update failed.");
+    }
   }
 
   const filteredProjects = useMemo(() => {

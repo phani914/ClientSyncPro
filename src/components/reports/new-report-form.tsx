@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { apiGet, apiSend } from "@/lib/browser-api";
 import {
-  readStoredReports,
   ReportCadence,
   reportCadences,
   ReportCategory,
@@ -14,8 +14,12 @@ import {
   reportFormats,
   ReportRecord,
   reportOwners,
-  reportsStorageKey,
 } from "./report-data";
+
+type ReportsApiData = {
+  reports: ReportRecord[];
+  exportCount: number;
+};
 
 type ReportForm = {
   name: string;
@@ -64,7 +68,7 @@ export function NewReportForm() {
     });
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const name = form.name.trim();
@@ -91,7 +95,9 @@ export function NewReportForm() {
       return;
     }
 
-    const currentReports = readStoredReports();
+    const currentReports = await apiGet<ReportsApiData>("/api/reports")
+      .then((data) => data.reports)
+      .catch(() => []);
     const duplicateReport = currentReports.find(
       (report) => report.name.toLowerCase() === name.toLowerCase(),
     );
@@ -114,13 +120,13 @@ export function NewReportForm() {
       recipients,
     };
 
-    window.localStorage.setItem(
-      reportsStorageKey,
-      JSON.stringify([...currentReports, nextReport]),
-    );
-
-    setMessage(`${name} created. Returning to the report library.`);
-    window.setTimeout(() => router.push("/reports"), 350);
+    try {
+      await apiSend<ReportRecord>("/api/reports", "POST", nextReport);
+      setMessage(`${name} created. Returning to the report library.`);
+      window.setTimeout(() => router.push("/reports"), 350);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Report creation failed.");
+    }
   }
 
   return (
