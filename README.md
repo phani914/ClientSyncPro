@@ -12,7 +12,8 @@ AUTH_SECRET=replace-with-a-long-random-secret
 ```
 
 Set these values in your deployment environment. In production,
-`AUTH_PASSWORD` is required for sign-in.
+`AUTH_PASSWORD` is required for sign-in and `AUTH_SECRET` or
+`NEXTAUTH_SECRET` must be at least 32 characters.
 
 ## API Integration
 
@@ -26,9 +27,31 @@ and local testing without a database.
 - `GET|POST|PATCH|DELETE /api/reports`
 - `POST /api/reports/export`
 - `GET|POST|PATCH /api/users`
+- `GET /api/health`
 
 Replace `src/lib/api-store.ts` with database or upstream service calls when the
 production backend contract is available.
+
+## Quality Checks
+
+Run the standard verification suite before handing a build to UAT:
+
+```bash
+npm run uat:check
+```
+
+This runs linting and the integration test suite against a production build.
+See [docs/UAT.md](docs/UAT.md) for tester credentials, smoke scenarios,
+acceptance checks, and defect reporting guidance.
+
+Run the production release gate before deployment:
+
+```bash
+npm run release:check
+```
+
+See [docs/PRODUCTION.md](docs/PRODUCTION.md) for deployment environment
+variables, security headers, health checks, and release steps.
 
 First, run the development server:
 

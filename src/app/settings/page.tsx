@@ -1,4 +1,5 @@
 import { DashboardNavigation } from "@/components/navigation/dashboard-navigation";
+import { SaveSettingsButton } from "@/components/settings/save-settings-button";
 
 const auditEvents = [
   {
@@ -29,12 +30,12 @@ export default function SettingsPage() {
     <main className="min-h-screen bg-[#eef3f8] text-slate-950">
       <DashboardNavigation active="settings" />
 
-      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
-        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mx-auto grid max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
+        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
             System Settings
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">
             Settings
           </h1>
           <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
@@ -45,7 +46,7 @@ export default function SettingsPage() {
 
         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <form className="grid gap-6">
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold tracking-normal">
                 Organization Profile
               </h2>
@@ -109,13 +110,13 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold tracking-normal">
                 Security Controls
               </h2>
 
               <div className="mt-6 grid gap-4">
-                <label className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4">
+                <label className="flex flex-col gap-4 rounded-md border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <span>
                     <span className="block text-sm font-semibold text-slate-800">
                       Require multi-factor authentication
@@ -131,7 +132,7 @@ export default function SettingsPage() {
                   />
                 </label>
 
-                <label className="flex items-center justify-between gap-4 rounded-md border border-slate-200 p-4">
+                <label className="flex flex-col gap-4 rounded-md border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <span>
                     <span className="block text-sm font-semibold text-slate-800">
                       Auto-lock inactive sessions
@@ -149,7 +150,7 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold tracking-normal">
                 Notifications
               </h2>
@@ -188,19 +189,12 @@ export default function SettingsPage() {
                 </label>
               </div>
 
-              <div className="mt-8">
-                <button
-                  className="h-12 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
-                  type="button"
-                >
-                  Save Settings
-                </button>
-              </div>
+              <SaveSettingsButton />
             </section>
           </form>
 
           <aside className="grid gap-6">
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold tracking-normal">
                 Integrations
               </h2>
@@ -208,7 +202,7 @@ export default function SettingsPage() {
               <div className="mt-5 grid gap-3">
                 {integrations.map((integration) => (
                   <div
-                    className="flex items-center justify-between gap-3 rounded-md border border-slate-200 p-4"
+                    className="flex flex-col gap-3 rounded-md border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between"
                     key={integration.name}
                   >
                     <span className="font-semibold text-slate-900">
@@ -222,7 +216,7 @@ export default function SettingsPage() {
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
               <h2 className="text-lg font-semibold tracking-normal">
                 Recent Changes
               </h2>

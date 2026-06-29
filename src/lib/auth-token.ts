@@ -17,11 +17,19 @@ export type AuthSession = {
 };
 
 function getAuthSecret() {
-  return (
-    process.env.AUTH_SECRET ??
-    process.env.NEXTAUTH_SECRET ??
-    "clientsync-local-development-secret"
-  );
+  const secret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+
+  if (process.env.NODE_ENV === "production") {
+    if (!secret || secret.length < 32) {
+      throw new Error(
+        "AUTH_SECRET or NEXTAUTH_SECRET must be at least 32 characters in production.",
+      );
+    }
+
+    return secret;
+  }
+
+  return secret ?? "clientsync-local-development-secret";
 }
 
 function sign(value: string) {

@@ -105,13 +105,13 @@ export function UsersManagement() {
   );
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
-      <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end">
+    <div className="mx-auto grid max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
+      <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end sm:p-6">
         <div>
           <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
             User Management
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal">Users</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">Users</h1>
           <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
             Manage account access, user roles, team ownership, and permission
             levels across ClientSync Pro.
@@ -119,7 +119,7 @@ export function UsersManagement() {
         </div>
 
         <Link
-          className="grid h-11 place-items-center rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+          className="grid h-11 w-full place-items-center rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 sm:w-auto"
           href="/users/new"
         >
           Add User
@@ -129,11 +129,11 @@ export function UsersManagement() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {userSummary.map((item) => (
           <article
-            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+            className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             key={item.label}
           >
             <p className="text-sm font-semibold text-slate-500">{item.label}</p>
-            <p className="mt-4 text-4xl font-semibold tracking-normal">
+            <p className="mt-3 text-3xl font-semibold tracking-normal sm:mt-4 sm:text-4xl">
               {item.value}
             </p>
           </article>
@@ -142,7 +142,7 @@ export function UsersManagement() {
 
       <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
         <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
             <div>
               <h2 className="text-lg font-semibold tracking-normal">
                 User Directory
@@ -166,7 +166,76 @@ export function UsersManagement() {
             />
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="grid gap-3 p-3 md:hidden">
+            {filteredUsers.map((user) => (
+              <article
+                className="rounded-lg border border-slate-200 p-4"
+                key={user.email}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-slate-900">
+                      {user.name}
+                    </h3>
+                    <p className="mt-1 break-words text-xs font-medium text-slate-500">
+                      {user.email}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {user.status}
+                  </span>
+                </div>
+
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Role
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {user.role}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Team
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {user.team}
+                    </dd>
+                  </div>
+                  <div className="col-span-2">
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Last Login
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {user.lastLogin}
+                    </dd>
+                  </div>
+                </dl>
+
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <button
+                    className="h-10 rounded-md border border-slate-300 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={user.status === "Active"}
+                    onClick={() => updateStatus(user.email, "Active")}
+                    type="button"
+                  >
+                    Activate
+                  </button>
+                  <button
+                    className="h-10 rounded-md border border-slate-300 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45"
+                    disabled={user.status === "Suspended"}
+                    onClick={() => updateStatus(user.email, "Suspended")}
+                    type="button"
+                  >
+                    Suspend
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[1040px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
@@ -223,9 +292,14 @@ export function UsersManagement() {
           </div>
 
           {filteredUsers.length === 0 ? (
-            <p className="border-t border-slate-100 px-5 py-4 text-sm font-medium text-slate-600">
-              No users match your search.
-            </p>
+            <div className="m-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+              <p className="text-sm font-semibold text-slate-900">
+                No users found
+              </p>
+              <p className="mt-1 text-sm font-medium text-slate-600">
+                Try a different name, email, role, team, or status.
+              </p>
+            </div>
           ) : null}
         </article>
 
@@ -249,7 +323,7 @@ export function UsersManagement() {
                 key={group.label}
               >
                 <p className="font-semibold text-slate-900">{group.label}</p>
-                <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-semibold text-slate-600">
+                <div className="mt-3 grid gap-2 text-xs font-semibold text-slate-600 sm:grid-cols-3">
                   <span>Admin: {group.admins}</span>
                   <span>Manager: {group.managers}</span>
                   <span>Support: {group.support}</span>

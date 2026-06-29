@@ -17,10 +17,11 @@ export default async function Home() {
         <header className="border-b border-slate-200 bg-[#101820] px-7 py-5">
           <Image
             className="mx-auto h-24 w-full max-w-[320px] object-cover"
-            src="/client-pro-logo.png"
+            src="/client-pro-logo-640.jpg"
             alt="ClientSync Pro"
-            width={1536}
-            height={1024}
+            width={640}
+            height={426}
+            sizes="320px"
             priority
           />
         </header>

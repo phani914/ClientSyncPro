@@ -295,13 +295,13 @@ export function RoleManagement() {
   }
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6">
-      <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end">
+    <div className="mx-auto grid max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
+      <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end sm:p-6">
         <div>
           <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
             Access Control
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">
             Role Management
           </h1>
           <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
@@ -311,7 +311,7 @@ export function RoleManagement() {
         </div>
 
         <button
-          className="h-11 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+          className="h-11 w-full rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 sm:w-auto"
           onClick={handleCreateRole}
           type="button"
         >
@@ -322,13 +322,13 @@ export function RoleManagement() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {roleSummary.map((item) => (
           <article
-            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+            className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
             key={item.label}
           >
             <p className="text-sm font-semibold text-slate-500">
               {item.label}
             </p>
-            <p className="mt-4 text-4xl font-semibold tracking-normal">
+            <p className="mt-3 text-3xl font-semibold tracking-normal sm:mt-4 sm:text-4xl">
               {item.value}
             </p>
           </article>
@@ -337,7 +337,7 @@ export function RoleManagement() {
 
       <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
         <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
+          <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
             <h2 className="text-lg font-semibold tracking-normal">
               Role Directory
             </h2>
@@ -356,7 +356,65 @@ export function RoleManagement() {
             />
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="grid gap-3 p-3 md:hidden">
+            {filteredRoles.map((role) => (
+              <article
+                className="rounded-lg border border-slate-200 p-4"
+                key={role.name}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-slate-900">
+                      {role.name}
+                    </h3>
+                    <p className="mt-1 text-sm font-medium text-slate-600">
+                      {role.scope}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {role.status}
+                  </span>
+                </div>
+
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+                  <div>
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Type
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {role.type}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Users
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {role.users}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-semibold uppercase text-slate-500">
+                      Review
+                    </dt>
+                    <dd className="mt-1 font-semibold text-slate-900">
+                      {role.review}
+                    </dd>
+                  </div>
+                </dl>
+
+                <button
+                  className="mt-4 h-10 w-full rounded-md border border-slate-300 px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                  onClick={() => handleEditRole(role)}
+                  type="button"
+                >
+                  Edit
+                </button>
+              </article>
+            ))}
+          </div>
+
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
@@ -400,14 +458,19 @@ export function RoleManagement() {
           </div>
 
           {filteredRoles.length === 0 ? (
-            <p className="border-t border-slate-100 px-5 py-4 text-sm font-medium text-slate-600">
-              No roles match your search.
-            </p>
+            <div className="m-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+              <p className="text-sm font-semibold text-slate-900">
+                No roles found
+              </p>
+              <p className="mt-1 text-sm font-medium text-slate-600">
+                Try a different role name, type, scope, review, or status.
+              </p>
+            </div>
           ) : null}
         </article>
 
         <aside className="grid gap-6">
-          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-lg font-semibold tracking-normal">
               {editingRole ? "Edit Role" : "New Role"}
             </h2>
@@ -502,7 +565,7 @@ export function RoleManagement() {
             </form>
           </section>
 
-          <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
             <h2 className="text-lg font-semibold tracking-normal">
               Review Queue
             </h2>
@@ -537,7 +600,7 @@ export function RoleManagement() {
       </section>
 
       <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
           <div>
             <h2 className="text-lg font-semibold tracking-normal">
               Permission Matrix
@@ -547,7 +610,7 @@ export function RoleManagement() {
             </p>
           </div>
           <Link
-            className="grid h-10 place-items-center rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+            className="grid h-10 w-full place-items-center rounded-md border border-slate-300 px-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 sm:w-auto"
             href="/users"
           >
             View Users

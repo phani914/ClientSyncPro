@@ -104,8 +104,8 @@ export function NewClientForm() {
   }
 
   return (
-    <div className="mx-auto grid max-w-5xl gap-6 px-4 py-6 sm:px-6">
-      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="mx-auto grid max-w-5xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
+      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         <Link
           className="text-sm font-semibold text-slate-600 transition hover:text-slate-950"
           href="/clients"
@@ -117,7 +117,7 @@ export function NewClientForm() {
           <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
             Client Management
           </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-normal">
+          <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">
             Add Client
           </h1>
           <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
@@ -132,7 +132,7 @@ export function NewClientForm() {
         className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]"
         onSubmit={handleSubmit}
       >
-        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="text-lg font-semibold tracking-normal">
             Client Details
           </h2>
@@ -229,7 +229,7 @@ export function NewClientForm() {
           </div>
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="text-lg font-semibold tracking-normal">
             Contact & Plan
           </h2>
@@ -301,7 +301,7 @@ export function NewClientForm() {
             </label>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <button
               className="h-12 rounded-md bg-slate-950 px-4 text-sm font-bold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
               type="submit"

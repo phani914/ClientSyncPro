@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:integration": "npm run build && node --test tests/integration/*.test.mjs",
+    "uat:check": "npm run lint && npm run test:integration",
+    "release:check": "npm run lint && npm run test:integration"
   },
   "dependencies": {
     "next": "16.2.9",
