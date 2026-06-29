@@ -208,7 +208,7 @@ export function ReportsManagement() {
   );
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
+    <div className="mx-auto grid max-w-[92rem] gap-4 px-3 py-4 sm:gap-6 sm:px-6 sm:py-6">
       <section className="flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end sm:p-6">
         <div>
           <p className="text-sm font-semibold uppercase tracking-normal text-slate-500">
@@ -245,7 +245,7 @@ export function ReportsManagement() {
         ))}
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
+      <section className="grid gap-6 xl:grid-cols-[1.65fr_0.75fr]">
         <article className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-5 xl:flex-row xl:items-center">
             <div>
@@ -412,40 +412,40 @@ export function ReportsManagement() {
           </div>
 
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[1180px] text-left text-sm">
+            <table className="w-full min-w-[1320px] text-left text-base">
               <thead className="bg-slate-50 text-xs uppercase text-slate-500">
                 <tr>
-                  <th className="px-5 py-3 font-semibold">Report</th>
-                  <th className="px-5 py-3 font-semibold">Category</th>
-                  <th className="px-5 py-3 font-semibold">Owner</th>
-                  <th className="px-5 py-3 font-semibold">Cadence</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 font-semibold">Format</th>
-                  <th className="px-5 py-3 font-semibold">Updated</th>
-                  <th className="px-5 py-3 font-semibold">Actions</th>
+                  <th className="px-6 py-4 font-semibold">Report</th>
+                  <th className="px-6 py-4 font-semibold">Category</th>
+                  <th className="px-6 py-4 font-semibold">Owner</th>
+                  <th className="px-6 py-4 font-semibold">Cadence</th>
+                  <th className="px-6 py-4 font-semibold">Status</th>
+                  <th className="px-6 py-4 font-semibold">Format</th>
+                  <th className="px-6 py-4 font-semibold">Updated</th>
+                  <th className="px-6 py-4 font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredReports.map((report) => (
                   <tr className="transition hover:bg-slate-50" key={report.name}>
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-6 py-5 align-top">
                       <p className="font-semibold text-slate-900">
                         {report.name}
                       </p>
-                      <p className="mt-1 max-w-xs text-xs font-medium text-slate-500">
+                      <p className="mt-2 max-w-sm text-sm font-medium leading-6 text-slate-500">
                         {report.description}
                       </p>
                     </td>
-                    <td className="px-5 py-4 align-top text-slate-600">
+                    <td className="px-6 py-5 align-top text-slate-600">
                       {report.category}
                     </td>
-                    <td className="px-5 py-4 align-top text-slate-600">
+                    <td className="px-6 py-5 align-top text-slate-600">
                       {report.owner}
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-6 py-5 align-top">
                       <select
                         aria-label={`Update ${report.name} cadence`}
-                        className="h-9 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
                         onChange={(event) =>
                           updateCadence(
                             report.name,
@@ -459,10 +459,10 @@ export function ReportsManagement() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-6 py-5 align-top">
                       <select
                         aria-label={`Update ${report.name} status`}
-                        className="h-9 rounded-md border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
+                        className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 outline-none transition focus:border-slate-950 focus:ring-2 focus:ring-slate-950/10"
                         onChange={(event) =>
                           updateStatus(
                             report.name,
@@ -476,23 +476,23 @@ export function ReportsManagement() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-5 py-4 align-top font-semibold">
+                    <td className="px-6 py-5 align-top font-semibold">
                       {report.format}
                     </td>
-                    <td className="px-5 py-4 align-top text-slate-600">
+                    <td className="px-6 py-5 align-top text-slate-600">
                       {report.updated}
                     </td>
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-6 py-5 align-top">
                       <div className="flex gap-2">
                         <button
-                          className="rounded-md border border-slate-300 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                          className="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
                           onClick={() => exportReport(report.name)}
                           type="button"
                         >
                           Export
                         </button>
                         <button
-                          className="rounded-md border border-red-200 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
+                          className="rounded-md border border-red-200 px-4 py-2.5 text-sm font-bold text-red-700 transition hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
                           onClick={() => deleteReport(report.name)}
                           type="button"
                         >
